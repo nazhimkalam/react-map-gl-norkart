@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDom from 'react-dom';
 import MapGL, { Marker, Map, Source, Layer } from 'react-map-gl';
 import { Editor, DrawPolygonMode } from 'react-map-gl-draw';
@@ -52,7 +52,10 @@ const geojson = {
 
 export default function App() {
   const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
-  const [markers, setMarkers] = useState(INIT_MAKERS);
+  const [markers, setMarkers] = useState({
+    type: '',
+    features: []
+  });
   const [mode, setMode] = useState(null);
   const [features, setFeatures] = useState([]);
 
@@ -60,20 +63,40 @@ export default function App() {
     setViewport(viewport);
   };
 
+  useEffect(() => {
+    if (geojson.features) {
+      setMarkers(geojson.features)
+    }
+  }, [geojson]);
+
+  useEffect(() => {
+    if (geojson.features) {
+      setMarkers(geojson.features)
+    }
+  }, [geojson])
+
   const handleUpdate = (val) => {
-    console.log('handle update data', val);
+    // console.log('handle update data', val);
     setFeatures(val.data);
 
     if (val.editType === 'addFeature') {
       const polygon = val.data[0].geometry.coordinates[0];
-      console.log('polygon', polygon);
+      // console.log('polygon', polygon);
       const newMarkers = markers.map((marker, i) => {
-        const { longitude, latitude } = marker;
+        const { geometry } = marker;
+        const { coordinates } = geometry;
+        let longitude = coordinates[0];
+        let latitude = coordinates[1];
+
+        console.log("longitude", longitude)
+        console.log("latitude", latitude)
         const isInsidePolygon = inside([longitude, latitude], polygon);
+        console.log("isInsidePolygon", isInsidePolygon)
 
         return { ...marker, toggle: isInsidePolygon };
       });
 
+      console.log("newMarkers", newMarkers)
       setMarkers(newMarkers);
       setFeatures([]);
       setMode(null);
