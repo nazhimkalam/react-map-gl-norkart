@@ -54,6 +54,7 @@ export default function App() {
   const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
   const [markers, setMarkers] = useState({});
   const [mode, setMode] = useState(null);
+  // const [isDataLoading, setIsDataLoading] = useState(true);
   const [features, setFeatures] = useState([]);
 
   const updateViewport = (viewport) => {
@@ -62,7 +63,8 @@ export default function App() {
 
   useEffect(() => {
     if (geojson.features) {
-      setMarkers(geojson.features)
+      setMarkers(geojson);
+      // setIsDataLoading(false);
     }
   }, [geojson]);
 
@@ -77,7 +79,7 @@ export default function App() {
     if (val.editType === 'addFeature') {
       const polygon = val.data[0].geometry.coordinates[0];
       // console.log('polygon', polygon);
-      const newMarkers = markers.map((marker, i) => {
+      const newMarkers = markers.features.map((marker, i) => {
         const { geometry } = marker;
         const { coordinates } = geometry;
         let longitude = coordinates[0];
@@ -91,8 +93,11 @@ export default function App() {
         return { ...marker, properties: { ...marker.properties, toggle: isInsidePolygon } };
       });
 
+      const updatedMarker = {...markers, features: newMarkers}
+
       console.log("newMarkers", newMarkers)
-      setMarkers(newMarkers);
+      console.log("updatedMarker", updatedMarker)
+      setMarkers(updatedMarker);
       setFeatures([]);
       setMode(null);
     }
@@ -118,7 +123,7 @@ export default function App() {
         features={features}
       />
 
-      <Source
+       <Source
         id="earthquakes"
         type="geojson"
         data={markers}
