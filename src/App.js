@@ -45,17 +45,14 @@ const geojson = {
     {
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [10, 30] },
-      properties: { id: 'lsadf;rk', toggle: false },
+      properties: { id: 'lsadf;rr', toggle: false },
     },
   ],
 };
 
 export default function App() {
   const [viewport, setViewport] = useState(DEFAULT_VIEWPORT);
-  const [markers, setMarkers] = useState({
-    type: '',
-    features: []
-  });
+  const [markers, setMarkers] = useState({});
   const [mode, setMode] = useState(null);
   const [features, setFeatures] = useState([]);
 
@@ -70,10 +67,8 @@ export default function App() {
   }, [geojson]);
 
   useEffect(() => {
-    if (geojson.features) {
-      setMarkers(geojson.features)
-    }
-  }, [geojson])
+    console.log("updated markers coordinates", markers);
+  }, [markers])
 
   const handleUpdate = (val) => {
     // console.log('handle update data', val);
@@ -93,7 +88,7 @@ export default function App() {
         const isInsidePolygon = inside([longitude, latitude], polygon);
         console.log("isInsidePolygon", isInsidePolygon)
 
-        return { ...marker, toggle: isInsidePolygon };
+        return { ...marker, properties: { ...marker.properties, toggle: isInsidePolygon } };
       });
 
       console.log("newMarkers", newMarkers)
@@ -126,7 +121,7 @@ export default function App() {
       <Source
         id="earthquakes"
         type="geojson"
-        data={geojson}
+        data={markers}
         // data={"https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson"}
         cluster={true}
         clusterMaxZoom={14}
